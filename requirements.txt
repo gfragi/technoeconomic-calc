@@ -4,7 +4,6 @@ ansible-core==2.16.8
 appdirs==1.4.4
 attrs==23.2.0
 Babel==2.10.3
-bcc==0.29.1
 bcrypt==3.2.2
 beautifulsoup4==4.12.3
 blessed==1.20.0
