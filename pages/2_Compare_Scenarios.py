@@ -26,12 +26,15 @@ selected_files = st.sidebar.multiselect("📂 Select Scenario Configs", config_f
 
 # --- Process selected scenarios ---
 scenario_results = {}
+tags = {}
 
 for file in selected_files:
     config_path = os.path.join(config_dir, file)
     loaded = TEAConfig.from_json(config_path)
+    scenario_config = loaded.scenario
     name = file.replace(".json", "")
-
+    tag = f"{scenario_config.name} ({scenario_config.subscriber_growth_rate:.0f}% subs/yr)"
+    tags[name] = tag
     scn = Scenario(**loaded.scenario.to_dict())
     fin = FinancialInputs(**loaded.financials.to_dict())
     calc = TEACalculator(scn, fin)
@@ -55,7 +58,7 @@ for file in selected_files:
     }
 
     scenario_results[name] = result
-
+    
 # --- Plots ---
 if scenario_results:
     any_result = next(iter(scenario_results.values()))
@@ -93,7 +96,8 @@ if scenario_results:
     # --- Metrics Summary ---
     st.subheader("📋 Scenario Summary Metrics")
     metrics_df = pd.DataFrame({
-        "Scenario": list(scenario_results.keys()),
+        "Scenario File": list(scenario_results.keys()),
+        "Description": [tags[name] for name in scenario_results.keys()],
         "NPV (€)": [r["npv"] for r in scenario_results.values()],
         "ROI": [r["roi"] for r in scenario_results.values()],
         "Break-even Year": [r["breakeven_year"] for r in scenario_results.values()],

@@ -54,8 +54,8 @@ years = st.sidebar.slider("Years to project", 3, 10, fin.years, help="The number
 
 
 starting_subs = st.sidebar.number_input("📦 Starting Subscribers (Year 0)", value=fin.starting_subscribers)
-sub_fee = st.sidebar.number_input("💶 Subscription Fee (€ / year)", value=fin.subscription_fee)
-ppu_fee = st.sidebar.number_input("💶 Pay-per-use Revenue (€ / year)", value=fin.pay_per_use_fee)
+sub_fee = st.sidebar.number_input("💶 Subscription Fee (€ / subscriber / year)", value=fin.subscription_fee)
+ppu_fee = st.sidebar.number_input("💶 Pay-per-use Revenue (€ / subscriber /year)", value=fin.pay_per_use_fee)
 capex = st.sidebar.number_input("🏗️ CAPEX (one-time investment, €)", value=fin.capex)
 base_opex = st.sidebar.number_input("💸 Base OPEX (€ / year)", value=fin.base_opex)
 
@@ -112,7 +112,7 @@ st.subheader("📈 Financial Projections")
 
 col1, col2, col3 = st.columns(3)
 col1.metric("NPV (€)", f"{npv:,.2f} €")
-col2.metric("ROI", f"{roi:.2f} %" if roi != float('inf') else "∞")
+col2.metric("ROI (%)", f"{roi * 100:.1f} %" if roi != float('inf') else "∞")
 col3.metric("Break-even Year", breakeven_year if breakeven_year != -1 else "Not Reached")
 
 st.plotly_chart(plot_revenue_breakdown(year_labels, subscription_revenue, ppu_revenue), use_container_width=True)

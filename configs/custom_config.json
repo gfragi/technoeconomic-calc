@@ -1,0 +1,16 @@
+{
+  "scenario": {
+    "name": "Base",
+    "subscriber_growth_rate": 13.4,
+    "opex_growth_rate": 10.8,
+    "discount_rate": 3.4000000000000004
+  },
+  "financials": {
+    "starting_subscribers": 1000,
+    "subscription_fee": 500.0,
+    "pay_per_use_fee": 300.0,
+    "base_opex": 86000.0,
+    "capex": 0.0,
+    "years": 5
+  }
+}
