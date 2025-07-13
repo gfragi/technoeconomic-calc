@@ -9,7 +9,9 @@ from plots import (
     plot_opex,
     plot_cash_flow,
     plot_breakeven,
-    plot_reverse_pricing
+    plot_reverse_pricing,
+    plot_annual_profit,
+    plot_annual_revenue
 )
 st.set_page_config(page_title="Techno-Economic Analysis", layout="wide")
 

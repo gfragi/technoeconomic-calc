@@ -8,7 +8,10 @@ from calculations import Scenario, FinancialInputs, TEACalculator
 from models import TEAConfig
 from plots import (
     plot_cash_flow,
-    plot_reverse_pricing
+    plot_reverse_pricing,
+    plot_annual_profit,
+    plot_annual_revenue,
+    plot_capex_vs_cumulative_profit
 )
 
 import plotly.graph_objects as go
@@ -28,7 +31,7 @@ for file in selected_files:
     config_path = os.path.join(config_dir, file)
     loaded = TEAConfig.from_json(config_path)
     name = file.replace(".json", "")
-    
+
     scn = Scenario(**loaded.scenario.to_dict())
     fin = FinancialInputs(**loaded.financials.to_dict())
     calc = TEACalculator(scn, fin)
@@ -68,6 +71,24 @@ if scenario_results:
         fig.add_trace(go.Scatter(x=year_labels, y=res["reverse_fee"], mode="lines+markers", name=name))
     fig.update_layout(title="Reverse Pricing (€/subscriber)", xaxis_title="Year", yaxis_title="Required Fee")
     st.plotly_chart(fig, use_container_width=True)
+
+    # --- Annual Trends ---
+    st.subheader("📈 Total Revenue Comparison")
+    total_revenues = {name: res["revenues"] for name, res in scenario_results.items()}
+    st.plotly_chart(plot_annual_revenue(year_labels, total_revenues), use_container_width=True)
+
+    st.subheader("📉 Annual Profit Comparison")
+    profits = {name: res["profit"] for name, res in scenario_results.items()}
+    st.plotly_chart(plot_annual_profit(year_labels, profits), use_container_width=True)
+    
+    # --- CAPEX vs Cumulative Profit ---
+    st.subheader("📦 CAPEX vs Cumulative Profit")
+    for name, res in scenario_results.items():
+        capex = TEAConfig.from_json(os.path.join(config_dir, name + ".json")).financials.capex
+        fig = plot_capex_vs_cumulative_profit(res["years"], res["cum_cash_flow"], capex, title=f"{name} – CAPEX vs Cumulative Profit")
+        st.plotly_chart(fig, use_container_width=True)
+
+
 
     # --- Metrics Summary ---
     st.subheader("📋 Scenario Summary Metrics")

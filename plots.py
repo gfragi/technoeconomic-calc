@@ -74,3 +74,68 @@ def plot_reverse_pricing(years: List[int], required_fees: List[float], title: st
         yaxis_title="€ per Subscriber to Cover OPEX"
     )
     return fig
+
+
+def plot_annual_profit(years: List[int], profit_by_scenario: Dict[str, List[float]], title: str = "Annual Profit Comparison"):
+    fig = go.Figure()
+    for scenario_name, profits in profit_by_scenario.items():
+        fig.add_trace(go.Scatter(x=years, y=profits, mode='lines+markers', name=scenario_name))
+    fig.update_layout(
+        title=title,
+        xaxis_title="Year",
+        yaxis_title="Profit (€)"
+    )
+    return fig
+
+
+def plot_annual_revenue(years: List[int], revenue_by_scenario: Dict[str, List[float]], title: str = "Total Revenue Comparison"):
+    fig = go.Figure()
+    for scenario_name, revenues in revenue_by_scenario.items():
+        fig.add_trace(go.Scatter(x=years, y=revenues, mode='lines+markers', name=scenario_name))
+    fig.update_layout(
+        title=title,
+        xaxis_title="Year",
+        yaxis_title="Revenue (€)"
+    )
+    return fig
+
+
+def plot_profit_margin(years: List[int], margin_by_scenario: Dict[str, List[float]], title: str = "Profit Margin Comparison"):
+    fig = go.Figure()
+    for scenario_name, margins in margin_by_scenario.items():
+        fig.add_trace(go.Scatter(x=years, y=margins, mode='lines+markers', name=scenario_name))
+    fig.update_layout(
+        title=title,
+        xaxis_title="Year",
+        yaxis_title="Profit Margin (%)"
+    )
+    return fig
+
+
+def plot_capex_vs_cumulative_profit(years: List[str], cum_profit: List[float], capex: float, title: str = "CAPEX vs Cumulative Profit"):
+    fig = go.Figure()
+
+    # Bar for CAPEX (shown only at Year 0)
+    fig.add_trace(go.Bar(
+        x=[years[0]],
+        y=[capex],
+        name="CAPEX",
+        marker_color="indianred"
+    ))
+
+    # Line for cumulative profit
+    fig.add_trace(go.Scatter(
+        x=years,
+        y=cum_profit,
+        mode="lines+markers",
+        name="Cumulative Profit",
+        line=dict(color="seagreen")
+    ))
+
+    fig.update_layout(
+        title=title,
+        xaxis_title="Year",
+        yaxis_title="€",
+        barmode='group'
+    )
+    return fig
