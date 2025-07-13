@@ -1,0 +1,4 @@
+Scenario,Description,NPV (€),ROI,Break-even Year
+low_growth_w_CAPEX,Low (5% subs/yr),406230.6490461425,8.42206575,1
+moderate_growth_w_CAPEX,Moderate (20% subs/yr),608343.761291542,14.34206575,1
+high_growth_w_CAPEX,High (30% subs/yr),726655.4771469905,19.46206575,1
