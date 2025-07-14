@@ -105,9 +105,13 @@ year_labels = [f"Year {i+1}" for i in range(years)]
 
 # --- Financial Calculations ---
 subscribers = calc.project_subscribers()
-subscribers = calc.project_subscribers()
-sub_revenue, ppu_revenue = calc.project_revenue_breakdown()
-revenues = [s + p for s, p in zip(sub_revenue, ppu_revenue)]
+subscription_users = [int(s * inputs.subscription_ratio) for s in subscribers]
+ppu_users = [s - sub for s, sub in zip(subscribers, subscription_users)]
+
+subscription_revenue = [n * sub_fee for n in subscription_users]
+ppu_revenue = [n * ppu_fee for n in ppu_users]
+
+revenues = [s + p for s, p in zip(subscription_revenue, ppu_revenue)]
 opex = calc.project_opex()
 profit = calc.calculate_profit()
 cum_cash_flow = calc.calculate_cumulative_cash_flow()
@@ -115,8 +119,6 @@ npv = calc.calculate_npv()
 roi = calc.calculate_roi()
 breakeven_year = calc.calculate_breakeven_year()
 
-subscription_revenue = [s * sub_fee for s in subscribers]
-ppu_revenue = [s * ppu_fee for s in subscribers]
 
 # --- Layout ---
 st.subheader("📈 Financial Projections")
@@ -138,10 +140,15 @@ st.plotly_chart(plot_reverse_pricing(year_labels, reverse_fees), use_container_w
 # --- Data Table View ---
 st.subheader("📋 Financial Projection Table (Annual)")
 
+subscription_users = [int(s * inputs.subscription_ratio) for s in subscribers]
+ppu_users = [s - sub for s, sub in zip(subscribers, subscription_users)]
+
 df = pd.DataFrame({
     "Year": year_labels,
-    "Subscribers (users)": subscribers,
-    "Subscription Revenue (€ / year)": sub_revenue,
+    "Total Subscribers (users)": subscribers,
+    "Subscription Model Users": subscription_users,
+    "Pay-per-Use Model Users": ppu_users,
+    "Subscription Revenue (€ / year)": subscription_revenue,
     "Pay-per-Use Revenue (€ / year)": ppu_revenue,
     "Total Revenue (€ / year)": revenues,
     "OPEX (€ / year)": opex,
@@ -152,6 +159,7 @@ df = pd.DataFrame({
 
 numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
 st.dataframe(df.style.format({col: "{:,.2f}" for col in numeric_cols}), use_container_width=True)
+
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("💾 Export New Scenario")
