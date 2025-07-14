@@ -19,6 +19,9 @@ st.set_page_config(page_title="Techno-Economic Analysis", layout="wide")
 config_dir = "./configs"
 config_files = [f for f in os.listdir(config_dir) if f.endswith(".json")]
 selected_file = st.sidebar.selectbox("📂 Load Scenario Config", config_files)
+# if st.session_state.get("last_config") != selected_file:
+#     st.session_state["last_config"] = selected_file
+#     st.experimental_rerun()
 
 # Load selected config
 config_path = os.path.join(config_dir, selected_file) if selected_file else None
@@ -50,31 +53,36 @@ fin = loaded_config.financials
 scn = loaded_config.scenario
 
 # Now use those variables safely
-years = st.sidebar.slider("Years to project", 3, 10, fin.years, help="The number of years to include in the projection.")
+years = st.sidebar.slider("Years to project", 3, 10, value=fin.years, key="years", help="The number of years to include in the projection.")
 
 
-starting_subs = st.sidebar.number_input("📦 Starting Subscribers (Year 0)", value=fin.starting_subscribers)
-sub_fee = st.sidebar.number_input("💶 Subscription Fee (€ / subscriber / year)", value=fin.subscription_fee)
-ppu_fee = st.sidebar.number_input("💶 Pay-per-use Revenue (€ / subscriber /year)", value=fin.pay_per_use_fee)
-capex = st.sidebar.number_input("🏗️ CAPEX (one-time investment, €)", value=fin.capex)
-base_opex = st.sidebar.number_input("💸 Base OPEX (€ / year)", value=fin.base_opex)
+starting_subs = st.sidebar.number_input("📦 Starting Subscribers (Year 0)", value=fin.starting_subscribers, key="subs")
+sub_fee = st.sidebar.number_input("💶 Subscription Fee (€ / subscriber / year)", value=fin.subscription_fee, key="sub_fee")
+ppu_fee = st.sidebar.number_input("💶 Pay-per-use Revenue (€ / subscriber /year)", value=fin.pay_per_use_fee, key="ppu_fee")
+subscription_ratio = st.sidebar.slider(
+    "🧮 % of Subscribers on Subscription Model",
+    0, 100, int(getattr(fin, "subscription_ratio", 100)), step=5, key="sub_ratio",
+    help="What percentage of users are charged via subscription vs. pay-per-use."
+)
+capex = st.sidebar.number_input("🏗️ CAPEX (one-time investment, €)", value=fin.capex, key="capex")
+base_opex = st.sidebar.number_input("💸 Base OPEX (€ / year)", value=fin.base_opex, key="opex")
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("📈 Growth & Financial Assumptions")
 
 sub_growth = st.sidebar.slider(
     "Subscriber Growth Rate (%)", 0.0, 50.0,
-    float(scn.subscriber_growth_rate), step=0.1,
+    float(scn.subscriber_growth_rate), step=0.1, key="sub_growth",
     help="Annual % growth in subscriber count."
 )
 opex_growth = st.sidebar.slider(
     "OPEX Growth Rate (%)", 0.0, 20.0,
-    float(scn.opex_growth_rate), step=0.1,
+    float(scn.opex_growth_rate), step=0.1, key="opex_growth",
     help="Annual % increase in operating expenses."
 )
 discount = st.sidebar.slider(
     "Discount Rate (%)", 0.0, 15.0,
-    float(scn.discount_rate), step=0.1,
+    float(scn.discount_rate), step=0.1, key="discount",
     help="Used for NPV calculation (e.g., cost of capital)."
 )
 
@@ -87,7 +95,8 @@ inputs = FinancialInputs(
     pay_per_use_fee=ppu_fee,
     base_opex=base_opex,
     capex=capex,
-    years=years
+    years=years,
+    subscription_ratio=subscription_ratio / 100.0  # convert to 0.0–1.0
 )
 calc = TEACalculator(scenario, inputs)
 
@@ -96,7 +105,9 @@ year_labels = [f"Year {i+1}" for i in range(years)]
 
 # --- Financial Calculations ---
 subscribers = calc.project_subscribers()
-revenues = calc.project_revenue()
+subscribers = calc.project_subscribers()
+sub_revenue, ppu_revenue = calc.project_revenue_breakdown()
+revenues = [s + p for s, p in zip(sub_revenue, ppu_revenue)]
 opex = calc.project_opex()
 profit = calc.calculate_profit()
 cum_cash_flow = calc.calculate_cumulative_cash_flow()
@@ -130,7 +141,7 @@ st.subheader("📋 Financial Projection Table (Annual)")
 df = pd.DataFrame({
     "Year": year_labels,
     "Subscribers (users)": subscribers,
-    "Subscription Revenue (€ / year)": subscription_revenue,
+    "Subscription Revenue (€ / year)": sub_revenue,
     "Pay-per-Use Revenue (€ / year)": ppu_revenue,
     "Total Revenue (€ / year)": revenues,
     "OPEX (€ / year)": opex,

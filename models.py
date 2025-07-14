@@ -27,7 +27,8 @@ class FinancialInputsConfig:
     base_opex: float
     capex: float
     years: int
-
+    subscription_ratio: float = 1.0  # Default to 100% subscription
+    
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 

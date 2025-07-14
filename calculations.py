@@ -1,5 +1,5 @@
 
-from typing import Dict, List
+from typing import Dict, List, Tuple
 import numpy as np
 
 class Scenario:
@@ -16,15 +16,18 @@ class FinancialInputs:
                  pay_per_use_fee: float,
                  base_opex: float,
                  capex: float = 0.0,
-                 years: int = 5):
+                 years: int = 5,
+                 subscription_ratio: float = 1.0 ):
         self.starting_subscribers = starting_subscribers
         self.subscription_fee = subscription_fee
         self.pay_per_use_fee = pay_per_use_fee
         self.base_opex = base_opex
         self.capex = capex
         self.years = years
+        self.subscription_ratio = subscription_ratio  # 0.0 to 1.0
 
 class TEACalculator:
+
     def __init__(self, scenario: Scenario, inputs: FinancialInputs):
         self.scenario = scenario
         self.inputs = inputs
@@ -43,7 +46,31 @@ class TEACalculator:
 
     def project_revenue(self) -> List[float]:
         subscribers = self.project_subscribers()
-        return [(s * (self.inputs.subscription_fee + self.inputs.pay_per_use_fee)) for s in subscribers]
+        r_sub = self.inputs.subscription_ratio
+        r_ppu = 1 - r_sub
+
+        revenue = []
+        for s in subscribers:
+            s_sub = s * r_sub
+            s_ppu = s * r_ppu
+            total = (s_sub * self.inputs.subscription_fee) + (s_ppu * self.inputs.pay_per_use_fee)
+            revenue.append(total)
+        return revenue
+
+    def project_revenue_breakdown(self) -> Tuple[List[float], List[float]]:
+        subscribers = self.project_subscribers()
+        r_sub = self.inputs.subscription_ratio
+        r_ppu = 1 - r_sub
+
+        rev_sub = []
+        rev_ppu = []
+        for s in subscribers:
+            s_sub = s * r_sub
+            s_ppu = s * r_ppu
+            rev_sub.append(s_sub * self.inputs.subscription_fee)
+            rev_ppu.append(s_ppu * self.inputs.pay_per_use_fee)
+
+        return rev_sub, rev_ppu
 
     def calculate_profit(self) -> List[float]:
         revenue = self.project_revenue()
@@ -75,3 +102,4 @@ class TEACalculator:
             if cf >= 0:
                 return i + 1
         return -1  # No breakeven within given years
+
