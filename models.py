@@ -1,5 +1,5 @@
 
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from typing import Dict, Any
 import json
 
@@ -27,8 +27,8 @@ class FinancialInputsConfig:
     base_opex: float
     capex: float
     years: int
-    subscription_ratio: float = 1.0  # Default to 100% subscription
-    
+    subscription_ratio: float = field(default=1.0)
+
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 

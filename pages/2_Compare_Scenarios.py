@@ -58,7 +58,7 @@ for file in selected_files:
     }
 
     scenario_results[name] = result
-    
+
 # --- Plots ---
 if scenario_results:
     any_result = next(iter(scenario_results.values()))
@@ -67,6 +67,29 @@ if scenario_results:
     st.subheader("📈 Cumulative Cash Flow Comparison")
     cum_flows = {name: res["cum_cash_flow"] for name, res in scenario_results.items()}
     st.plotly_chart(plot_cash_flow(year_labels, cum_flows), use_container_width=True)
+
+    # --- Break-even Year Comparison ---
+    st.subheader("📌 Break-even Year Comparison")
+
+    fig = go.Figure()
+    for name, res in scenario_results.items():
+        breakeven = res["breakeven_year"]
+        fig.add_trace(go.Bar(
+            x=[name],
+            y=[breakeven if breakeven != -1 else None],
+            text=[f"{breakeven}" if breakeven != -1 else "Not Reached"],
+            textposition="auto",
+            name=name
+        ))
+
+    fig.update_layout(
+        title="Break-even Year by Scenario",
+        xaxis_title="Scenario",
+        yaxis_title="Year",
+        yaxis=dict(dtick=1),
+        showlegend=False
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
     st.subheader("📉 Reverse Pricing Comparison")
     fig = go.Figure()
@@ -83,7 +106,8 @@ if scenario_results:
     st.subheader("📉 Annual Profit Comparison")
     profits = {name: res["profit"] for name, res in scenario_results.items()}
     st.plotly_chart(plot_annual_profit(year_labels, profits), use_container_width=True)
-    
+
+
     # --- CAPEX vs Cumulative Profit ---
     st.subheader("📦 CAPEX vs Cumulative Profit")
     for name, res in scenario_results.items():

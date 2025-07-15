@@ -62,7 +62,10 @@ sub_fee = st.sidebar.number_input("💶 Subscription Fee (€ / subscriber / yea
 ppu_fee = st.sidebar.number_input("💶 Pay-per-use Revenue (€ / subscriber /year)", value=fin.pay_per_use_fee, key="ppu_fee")
 subscription_ratio = st.sidebar.slider(
     "🧮 % of Subscribers on Subscription Model",
-    0, 100, int(getattr(fin, "subscription_ratio", 100)), step=5, key="sub_ratio",
+    0, 100,
+    int(getattr(fin, "subscription_ratio", 1.0) * 100),  # ✅ convert from 0.0–1.0 to %
+    step=5,
+    key="sub_ratio",
     help="What percentage of users are charged via subscription vs. pay-per-use."
 )
 capex = st.sidebar.number_input("🏗️ CAPEX (one-time investment, €)", value=fin.capex, key="capex")
@@ -193,7 +196,8 @@ with st.sidebar.form("save_as_new_form"):
                 pay_per_use_fee=inputs.pay_per_use_fee,
                 base_opex=inputs.base_opex,
                 capex=inputs.capex,
-                years=inputs.years
+                years=inputs.years,
+                subscription_ratio=inputs.subscription_ratio
             )
         )
         save_path = os.path.join(config_dir, f"{new_config_name}.json")
@@ -219,7 +223,8 @@ with st.sidebar.form("update_current_form"):
                 pay_per_use_fee=inputs.pay_per_use_fee,
                 base_opex=inputs.base_opex,
                 capex=inputs.capex,
-                years=inputs.years
+                years=inputs.years,
+                subscription_ratio=inputs.subscription_ratio
             )
         )
         update_path = os.path.join(config_dir, selected_file)
