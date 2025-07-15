@@ -139,3 +139,27 @@ def plot_capex_vs_cumulative_profit(years: List[str], cum_profit: List[float], c
         barmode='group'
     )
     return fig
+
+
+def plot_user_model_split(year_labels, subscription_users, ppu_users):
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=year_labels,
+        y=subscription_users,
+        name="Subscription Users",
+    ))
+    fig.add_trace(go.Bar(
+        x=year_labels,
+        y=ppu_users,
+        name="Pay-per-Use Users",
+    ))
+
+    fig.update_layout(
+        barmode="stack",
+        title="📊 User Model Split Over Time",
+        xaxis_title="Year",
+        yaxis_title="Number of Users",
+        legend=dict(x=0.01, y=0.99)
+    )
+
+    return fig

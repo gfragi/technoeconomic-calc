@@ -10,8 +10,9 @@ from plots import (
     plot_cash_flow,
     plot_breakeven,
     plot_reverse_pricing,
-    plot_annual_profit,
-    plot_annual_revenue
+    # plot_annual_profit,
+    # plot_annual_revenue,
+    plot_user_model_split
 )
 st.set_page_config(page_title="Techno-Economic Analysis", layout="wide")
 
@@ -131,11 +132,19 @@ col3.metric("Break-even Year", breakeven_year if breakeven_year != -1 else "Not 
 st.plotly_chart(plot_revenue_breakdown(year_labels, subscription_revenue, ppu_revenue), use_container_width=True)
 st.plotly_chart(plot_opex(year_labels, opex), use_container_width=True)
 st.plotly_chart(plot_cash_flow(year_labels, {"Base": cum_cash_flow}), use_container_width=True)
+# st.plotly_chart(plot_annual_revenue(year_labels, {"Base": revenues}), use_container_width=True)
+# st.plotly_chart(plot_annual_profit(year_labels, {"Base": profit}), use_container_width=True)
 st.plotly_chart(plot_breakeven(cum_cash_flow, year_labels), use_container_width=True)
 
 # --- Reverse Pricing ---
 reverse_fees = [o / max(s, 1) for o, s in zip(opex, subscribers)]
 st.plotly_chart(plot_reverse_pricing(year_labels, reverse_fees), use_container_width=True)
+
+
+st.plotly_chart(
+    plot_user_model_split(year_labels, subscription_users, ppu_users),
+    use_container_width=True
+)
 
 # --- Data Table View ---
 st.subheader("📋 Financial Projection Table (Annual)")
@@ -160,16 +169,18 @@ df = pd.DataFrame({
 numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
 st.dataframe(df.style.format({col: "{:,.2f}" for col in numeric_cols}), use_container_width=True)
 
-
+# --- Save Options ---
 st.sidebar.markdown("---")
-st.sidebar.subheader("💾 Export New Scenario")
+st.sidebar.header("💾 Save Scenario Options")
 
-with st.sidebar.form("save_config_form"):
-    new_config_name = st.text_input("Config Name (no spaces)", value="custom_config")
-    save_it = st.form_submit_button("Save Scenario")
+# Option A: Save as New
+with st.sidebar.form("save_as_new_form"):
+    st.markdown("**🆕 Save as New Scenario**")
+    new_config_name = st.text_input("New Config Name (no spaces)", value="custom_config")
+    save_new = st.form_submit_button("Save As New")
 
-    if save_it and new_config_name:
-        export_config = TEAConfig(
+    if save_new and new_config_name:
+        new_config = TEAConfig(
             scenario=ScenarioConfig(
                 name=scenario.name,
                 subscriber_growth_rate=scenario.subscriber_growth_rate * 100,
@@ -185,10 +196,35 @@ with st.sidebar.form("save_config_form"):
                 years=inputs.years
             )
         )
-        save_path = os.path.join("configs", f"{new_config_name}.json")
-        export_config.to_json(save_path)
-        st.success(f"Saved as {save_path}")
+        save_path = os.path.join(config_dir, f"{new_config_name}.json")
+        new_config.to_json(save_path)
+        st.success(f"✅ Saved as '{new_config_name}.json'")
 
+# Option B: Overwrite Current
+with st.sidebar.form("update_current_form"):
+    st.markdown(f"**✏️ Update Loaded Scenario** (`{selected_file}`)")
+    update_confirm = st.form_submit_button("Update Current Config")
+
+    if update_confirm and selected_file:
+        updated_config = TEAConfig(
+            scenario=ScenarioConfig(
+                name=scenario.name,
+                subscriber_growth_rate=scenario.subscriber_growth_rate * 100,
+                opex_growth_rate=scenario.opex_growth_rate * 100,
+                discount_rate=scenario.discount_rate * 100
+            ),
+            financials=FinancialInputsConfig(
+                starting_subscribers=inputs.starting_subscribers,
+                subscription_fee=inputs.subscription_fee,
+                pay_per_use_fee=inputs.pay_per_use_fee,
+                base_opex=inputs.base_opex,
+                capex=inputs.capex,
+                years=inputs.years
+            )
+        )
+        update_path = os.path.join(config_dir, selected_file)
+        updated_config.to_json(update_path)
+        st.success(f"✅ Updated '{selected_file}'")
 
 
 
