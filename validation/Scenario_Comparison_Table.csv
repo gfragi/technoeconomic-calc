@@ -1,0 +1,11 @@
+Parameter,Conservative,Moderate,Aggressive
+Initial Subscribers,20,20,20
+Annual Subscriber Growth Rate,5%,20%,30%
+Subscription Fee per User,"€5,000","€5,000","€5,000"
+Pay-per-Use Fee per User,"€3,000","€3,000","€3,000"
+Annual OPEX Growth Rate,5%,5%,5%
+Discount Rate,10%,10%,10%
+Subscription Ratio,90%,70%,50%
+Years,6,6,6
+Base OPEX (€),"€86,000","€86,000","€86,000"
+CAPEX (€),€0,€0,€0

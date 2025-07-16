@@ -1,6 +1,6 @@
 {
   "scenario": {
-    "name": "Base",
+    "name": "Conservative",
     "subscriber_growth_rate": 5.0,
     "opex_growth_rate": 5.0,
     "discount_rate": 10.0

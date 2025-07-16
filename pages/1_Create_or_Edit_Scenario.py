@@ -134,7 +134,7 @@ col3.metric("Break-even Year", breakeven_year if breakeven_year != -1 else "Not 
 
 st.plotly_chart(plot_revenue_breakdown(year_labels, subscription_revenue, ppu_revenue), use_container_width=True)
 st.plotly_chart(plot_opex(year_labels, opex), use_container_width=True)
-st.plotly_chart(plot_cash_flow(year_labels, {"Base": cum_cash_flow}), use_container_width=True)
+# st.plotly_chart(plot_cash_flow(year_labels, {"Base": cum_cash_flow}), use_container_width=True)
 # st.plotly_chart(plot_annual_revenue(year_labels, {"Base": revenues}), use_container_width=True)
 # st.plotly_chart(plot_annual_profit(year_labels, {"Base": profit}), use_container_width=True)
 st.plotly_chart(plot_breakeven(cum_cash_flow, year_labels), use_container_width=True)
